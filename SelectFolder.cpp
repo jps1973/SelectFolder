@@ -654,6 +654,80 @@ LRESULT CALLBACK SelectFolderWndProc( HWND hWndSelectFolder, UINT uMessage, WPAR
 			break;
 
 		} // End of a command message
+		case WM_NOTIFY:
+		{
+			// A notify message
+			LPNMHDR lpNmHdr;
+
+			// Get notify message handler
+			lpNmHdr = ( LPNMHDR )lParam;
+
+			// See if notify message is from tree view window
+			if( lpNmHdr->hwndFrom == g_hWndTreeView )
+			{
+				// Notify message is from tree view window
+
+				// Select notify message
+				switch( lpNmHdr->code )
+				{
+					case TVN_ITEMEXPANDING:
+					{
+						// An item expanding message
+						HTREEITEM hItem;
+
+						// Get tree item
+						hItem = ( ( LPNMTREEVIEW )lParam )->itemNew.hItem;
+
+						// Allocate string memory
+						LPTSTR lpszFolderPath = new char[ STRING_LENGTH ];
+
+						// Get folder path
+						TreeViewWindowGetItemPath( hItem, lpszFolderPath );
+
+						// Disable tree view window
+						EnableWindow( g_hWndTreeView, FALSE );
+
+						// Show sub folders on tree view window
+						TreeViewWindowAddSubFolders( hItem );
+
+						// Enable tree view window
+						EnableWindow( g_hWndTreeView, TRUE );
+
+						// Free string memory
+						delete [] lpszFolderPath;
+
+						// Break out of switch
+						break;
+
+					} // End of an item expanding message
+					default:
+					{
+						// Default notify message
+
+						// Call default window procedure
+						lr = DefWindowProc( hWndSelectFolder, uMessage, wParam, lParam );
+
+						// Break out of switch
+						break;
+
+					} // End of default notify message
+
+				}; // End of selection for notify message
+
+			} // End of notify message is from tree view window
+			else
+			{
+				// Notify message is not from tree view window
+
+				// Call default window procedure
+				lr = DefWindowProc( hWndSelectFolder, uMessage, wParam, lParam );
+
+			} // End of notify message is not from tree view window
+
+			// Break out of switch
+			break;
+
+		} // End of a notify message
 		case WM_CTLCOLORSTATIC:
 		{
 			// A control color static message
